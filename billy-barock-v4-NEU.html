@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Billy & Barock – IKEA Quest v4</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+:root{
+  --blue:#0051BA;--yellow:#FFCC00;--red:#E02020;--green:#00854A;--purple:#7C3AED;
+  --light:#F2F2EE;--dark:#111;
+  --t1:#0051BA;--t2:#FFCC00;--t3:#E02020;
+  --r:14px;--sh:0 2px 16px rgba(0,0,0,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;overflow:hidden;}
+body{font-family:'DM Sans',sans-serif;background:var(--light);color:var(--dark);}
+
+/* SCREENS */
+.screen{position:fixed;inset:0;display:none;flex-direction:column;overflow:hidden;background:var(--light);}
+.screen.on{display:flex;}
+
+/* ── INTRO ── */
+#sIntro{overflow-y:auto;}
+.intro-hero{background:var(--blue);padding:28px 20px 22px;text-align:center;}
+.i-logo{display:inline-block;background:var(--yellow);color:var(--blue);font-family:'Fraunces',serif;font-weight:900;font-size:32px;padding:6px 16px;border-radius:6px;margin-bottom:12px;}
+.i-hero-title{font-family:'Fraunces',serif;font-size:24px;font-weight:900;color:#fff;line-height:1.2;margin-bottom:5px;}
+.i-hero-sub{font-size:13px;color:rgba(255,255,255,.75);}
+.i-body{padding:14px 14px 50px;}
+.icard{background:#fff;border-radius:var(--r);padding:15px;margin-bottom:11px;box-shadow:var(--sh);}
+.icard h3{font-family:'Fraunces',serif;font-size:15px;color:var(--blue);margin-bottom:10px;}
+.name-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.dot{width:14px;height:14px;border-radius:50%;flex-shrink:0;}
+.ninp{flex:1;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:15px;border:2px solid #ddd;border-radius:9px;transition:.2s;}
+.ninp:focus{outline:none;border-color:var(--blue);}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:4px;}
+.pp{border-radius:9px;padding:10px;font-size:12px;font-weight:500;text-align:center;line-height:1.4;}
+.pp strong{display:block;font-size:15px;font-weight:700;margin-top:2px;}
+.pp-b{background:#e8f0fc;color:var(--blue);}
+.pp-y{background:#fffbe0;color:#886600;}
+.pp-g{background:#e6f5ee;color:#005a33;}
+.pp-r{background:#fdeaea;color:#a00;}
+.rules{font-size:13px;color:#444;line-height:1.75;padding-left:16px;}
+.go-btn{display:block;width:100%;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:'Fraunces',serif;font-size:19px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,81,186,.3);transition:.15s;}
+.go-btn:active{transform:scale(.97);}
+
+/* ── TEAM BUZZER SCREEN ── */
+#sTeam{background:var(--blue);overflow-y:auto;}
+.team-buzzer-wrap{padding:24px 16px 50px;display:flex;flex-direction:column;align-items:center;min-height:100%;}
+.tb-logo{background:var(--yellow);color:var(--blue);font-family:'Fraunces',serif;font-weight:900;font-size:28px;padding:5px 14px;border-radius:5px;margin-bottom:16px;}
+.tb-title{font-family:'Fraunces',serif;font-size:22px;font-weight:900;color:#fff;text-align:center;margin-bottom:6px;}
+.tb-sub{font-size:13px;color:rgba(255,255,255,.7);text-align:center;margin-bottom:24px;}
+.team-select-grid{display:flex;flex-direction:column;gap:10px;width:100%;max-width:340px;}
+.team-sel-btn{padding:18px;border:none;border-radius:var(--r);font-family:'Fraunces',serif;font-size:20px;font-weight:700;cursor:pointer;transition:.15s;box-shadow:var(--sh);}
+.team-sel-btn:active{transform:scale(.96);}
+.tsb-1{background:#fff;color:var(--blue);}
+.tsb-2{background:var(--yellow);color:var(--blue);}
+.tsb-3{background:var(--red);color:#fff;}
+.tb-mod-btn{margin-top:20px;padding:12px 24px;background:rgba(255,255,255,.15);color:#fff;border:2px solid rgba(255,255,255,.4);border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+/* ── TEAM ANSWER SCREEN ── */
+#sTeamAnswer{overflow-y:auto;}
+.ta-header{padding:14px 16px;display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.ta-back{background:none;border:none;font-size:22px;cursor:pointer;padding:4px;}
+.ta-title{font-family:'Fraunces',serif;font-size:17px;font-weight:700;color:var(--blue);}
+.ta-body{padding:0 14px 40px;}
+.ta-station-info{background:var(--blue);color:#fff;border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.ta-st-name{font-family:'Fraunces',serif;font-size:18px;font-weight:700;}
+.ta-st-loc{font-size:12px;opacity:.8;margin-top:2px;}
+.ta-q-card{background:#fff;border-radius:var(--r);padding:15px;margin-bottom:10px;box-shadow:var(--sh);border-left:4px solid var(--blue);}
+.ta-q-num{font-size:11px;font-weight:700;color:var(--blue);margin-bottom:6px;text-transform:uppercase;}
+.ta-q-text{font-size:15px;font-weight:600;line-height:1.4;margin-bottom:12px;}
+.ta-mc-btn{width:100%;padding:13px 14px;text-align:left;background:#f5f5f5;border:2px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-bottom:7px;transition:.15s;}
+.ta-mc-btn.selected{background:var(--blue);color:#fff;border-color:var(--blue);}
+.ta-mc-btn:active{transform:scale(.98);}
+.ta-open-inp{width:100%;padding:12px;font-size:15px;border:2px solid #ddd;border-radius:10px;font-family:'DM Sans',sans-serif;margin-bottom:10px;}
+.ta-open-inp:focus{outline:none;border-color:var(--blue);}
+.ta-submit-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:'Fraunces',serif;font-size:18px;font-weight:700;cursor:pointer;}
+.ta-waiting{text-align:center;padding:20px;font-size:14px;color:#888;}
+.ta-no-q{text-align:center;padding:30px 20px;}
+.ta-no-q .emoji{font-size:48px;margin-bottom:10px;}
+.ta-no-q p{font-size:14px;color:#666;line-height:1.6;}
+.ta-score-chip{border-radius:10px;padding:10px 16px;text-align:center;margin-bottom:12px;}
+.ta-score-chip.c1{background:var(--blue);color:#fff;}
+.ta-score-chip.c2{background:var(--yellow);color:var(--blue);}
+.ta-score-chip.c3{background:var(--red);color:#fff;}
+.ta-score-chip .csn{font-size:12px;opacity:.85;}
+.ta-score-chip .csp{font-family:'Fraunces',serif;font-size:32px;font-weight:900;}
+
+/* ── MAIN APP ── */
+#sApp{}
+.topbar{background:var(--blue);padding:10px 13px 0;flex-shrink:0;box-shadow:0 2px 10px rgba(0,81,186,.3);}
+.topbar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.tb-logo-s{background:var(--yellow);color:var(--blue);font-family:'Fraunces',serif;font-weight:900;font-size:16px;padding:2px 7px;border-radius:4px;flex-shrink:0;}
+.tb-appname{flex:1;font-size:11px;font-weight:600;color:rgba(255,255,255,.85);line-height:1.3;}
+.tb-pill{background:var(--yellow);color:var(--blue);font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;flex-shrink:0;}
+.score-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:0 0 9px;}
+.ss{border-radius:8px;padding:5px 3px;text-align:center;}
+.ss.c1{background:rgba(255,255,255,.18);}
+.ss.c2{background:rgba(255,204,0,.22);}
+.ss.c3{background:rgba(224,32,32,.22);}
+.ss-n{font-size:9px;font-weight:700;color:#fff;opacity:.85;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.ss-p{font-family:'Fraunces',serif;font-size:19px;font-weight:900;color:#fff;line-height:1;}
+.bottomnav{display:flex;background:#fff;border-top:1px solid #e8e8e8;flex-shrink:0;box-shadow:0 -2px 10px rgba(0,0,0,.07);}
+.bn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 2px 10px;font-size:10px;font-weight:600;color:#aaa;border:none;background:none;cursor:pointer;gap:2px;transition:.15s;}
+.bn .bi{font-size:19px;line-height:1;}
+.bn.on{color:var(--blue);}
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;}
+
+/* ── GUIDE ── */
+.gw{padding:12px 12px 20px;}
+.st-hero{border-radius:var(--r);padding:15px;margin-bottom:10px;box-shadow:var(--sh);background:var(--blue);color:#fff;position:relative;overflow:hidden;}
+.st-hero::after{content:'';position:absolute;right:-15px;top:-15px;width:90px;height:90px;background:rgba(255,255,255,.08);border-radius:50%;}
+.st-n{font-size:10px;font-weight:700;opacity:.7;text-transform:uppercase;letter-spacing:.5px;}
+.st-name{font-family:'Fraunces',serif;font-size:21px;font-weight:900;line-height:1.1;margin:3px 0;}
+.st-loc{font-size:12px;opacity:.8;display:flex;align-items:center;gap:4px;}
+.st-meta{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+.st-badge{background:rgba(255,255,255,.2);border-radius:5px;padding:3px 8px;font-size:11px;font-weight:600;}
+.step-card{background:#fff;border-radius:var(--r);padding:13px;margin-bottom:9px;box-shadow:var(--sh);}
+.slabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:#bbb;margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.slabel-bar{height:2px;flex:1;background:#f0f0f0;border-radius:2px;overflow:hidden;}
+.slabel-fill{height:100%;background:var(--blue);border-radius:2px;}
+.ctx{background:#eef4ff;border-left:3px solid var(--blue);border-radius:0 8px 8px 0;padding:10px 12px;font-size:13px;color:#003580;line-height:1.55;margin-bottom:7px;}
+.ff{background:#fffbe0;border-left:3px solid var(--yellow);border-radius:0 8px 8px 0;padding:8px 11px;font-size:12px;color:#664400;line-height:1.5;margin-top:5px;}
+.q-card{border-radius:var(--r);padding:13px;margin-bottom:9px;box-shadow:var(--sh);background:#fff;border-left:4px solid var(--blue);}
+.q-card.done{border-left-color:var(--green);}
+.q-card.ice{border-left-color:var(--yellow);}
+.q-card.schaetz{border-left-color:var(--purple);}
+.qhead{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px;}
+.qnum{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;}
+.qtype{font-size:10px;color:#ccc;font-weight:600;text-transform:uppercase;}
+.qtext{font-size:14px;font-weight:600;line-height:1.4;margin-bottom:9px;}
+.mc-box{background:#f8f9fa;border-radius:8px;padding:8px 10px;font-size:12px;line-height:1.85;margin-bottom:8px;}
+.mc-box .cor{font-weight:700;color:var(--green);}
+.ans-box{background:#e6f5ee;border-radius:8px;padding:8px 11px;font-size:12px;color:#005a33;margin-bottom:9px;font-weight:500;}
+.hint-btn{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;font-weight:600;padding:2px 0;display:block;margin-bottom:5px;}
+.hint-box{background:#fffbe0;border-left:3px solid var(--yellow);padding:7px 10px;font-size:11px;color:#664400;border-radius:0 6px 6px 0;line-height:1.5;margin-bottom:8px;}
+.schaetz-notice{background:#f3eeff;border-left:3px solid var(--purple);border-radius:0 8px 8px 0;padding:9px 11px;font-size:12px;color:#4B0082;line-height:1.5;margin-bottom:8px;}
+
+/* Scoring grid */
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.tsb2{border-radius:8px;padding:7px 3px;text-align:center;}
+.tsb2.b1{background:#e8f0fc;border:2px solid #c5d6f5;}
+.tsb2.b2{background:#fffbe0;border:2px solid #ffe566;}
+.tsb2.b3{background:#fdeaea;border:2px solid #f5b0b0;}
+.tsb2-n{font-size:9px;font-weight:700;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.b1 .tsb2-n{color:var(--blue);}
+.b2 .tsb2-n{color:#886600;}
+.b3 .tsb2-n{color:var(--red);}
+.pbcol{display:flex;flex-direction:column;gap:3px;}
+.pb{width:100%;padding:7px 1px;font-size:12px;font-weight:700;border:none;border-radius:6px;cursor:pointer;font-family:'DM Sans',sans-serif;transition:.1s;}
+.pb:active{transform:scale(.9);}
+.pb0{background:#eee;color:#888;}
+.pb1,.pb2{background:linear-gradient(135deg,#8B5CF6,#6D28D9);color:#fff;font-size:11px;}
+.pb3{background:#d4edda;color:#155724;}
+.pb4{background:var(--yellow);color:var(--blue);}
+.pb5{background:#28a745;color:#fff;}
+.pb.sel{box-shadow:0 0 0 3px #fff,0 0 0 5px var(--blue);}
+.pb0.sel{box-shadow:0 0 0 3px #fff,0 0 0 5px #888;}
+.pb5.sel{box-shadow:0 0 0 3px #fff,0 0 0 5px #28a745;}
+
+/* Buzzer panel inside guide */
+.buzzer-panel{background:#f8f0ff;border:2px solid var(--purple);border-radius:var(--r);padding:12px;margin-bottom:9px;}
+.buzzer-panel h4{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:8px;}
+.buzzer-entry{display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:#fff;border-radius:8px;margin-bottom:5px;box-shadow:0 1px 4px rgba(0,0,0,.06);}
+.be-team{font-size:13px;font-weight:700;}
+.be-answer{font-size:13px;color:#555;flex:1;margin:0 10px;font-style:italic;}
+.be-time{font-size:10px;color:#bbb;}
+.clear-buzzer-btn{font-size:11px;color:var(--purple);background:none;border:none;cursor:pointer;font-weight:600;margin-top:4px;}
+
+/* Station nav */
+.stnav{display:flex;gap:8px;margin-top:12px;}
+.nav-btn-arrow{flex:1;padding:12px;border:none;border-radius:var(--r);font-family:'Fraunces',serif;font-size:15px;font-weight:700;cursor:pointer;transition:.15s;}
+.nav-btn-arrow:active{transform:scale(.96);}
+.nb-prev{background:#fff;color:var(--blue);border:2px solid var(--blue);}
+.nb-next{background:var(--blue);color:#fff;box-shadow:0 3px 12px rgba(0,81,186,.3);}
+.nb-disabled{opacity:.3;cursor:not-allowed;}
+
+/* ── MAP VIEW ── */
+.map-wrap{padding:12px;}
+#mapEl{height:360px;border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;margin-bottom:10px;}
+.map-legend{background:#fff;border-radius:var(--r);padding:13px;box-shadow:var(--sh);}
+.map-legend h3{font-family:'Fraunces',serif;font-size:15px;color:var(--blue);margin-bottom:10px;}
+.legend-row{display:flex;align-items:center;gap:9px;padding:6px 0;border-bottom:1px solid #f5f5f5;cursor:pointer;}
+.legend-row:last-child{border-bottom:none;}
+.leg-num{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;}
+.leg-done{background:var(--green);}
+.leg-cur{background:var(--blue);}
+.leg-todo{background:#ccc;}
+.leg-info{flex:1;}
+.leg-name{font-size:13px;font-weight:600;color:var(--dark);}
+.leg-loc{font-size:11px;color:#888;}
+.leg-pts{font-family:'Fraunces',serif;font-size:14px;font-weight:700;color:var(--blue);}
+
+/* ── SCOREBOARD VIEW ── */
+.sbw{padding:12px 12px 20px;}
+.sb-h{font-family:'Fraunces',serif;font-size:22px;font-weight:900;text-align:center;color:var(--blue);margin-bottom:4px;}
+.sb-s{font-size:12px;color:#aaa;text-align:center;margin-bottom:14px;}
+.tc-card{border-radius:var(--r);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;box-shadow:var(--sh);}
+.tc-r{font-family:'Fraunces',serif;font-size:28px;font-weight:900;min-width:34px;text-align:center;}
+.tc-i{flex:1;min-width:0;}
+.tc-name{font-family:'Fraunces',serif;font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tc-lbl{font-size:10px;opacity:.7;margin-top:1px;}
+.bw{height:6px;background:rgba(255,255,255,.3);border-radius:3px;margin-top:5px;overflow:hidden;}
+.bf{height:100%;background:#fff;border-radius:3px;transition:width .5s cubic-bezier(.34,1.56,.64,1);}
+.card2 .bw{background:rgba(0,0,0,.15);}.card2 .bf{background:var(--blue);}
+.tc-pts{font-family:'Fraunces',serif;font-size:40px;font-weight:900;line-height:1;}
+.card1{background:var(--t1);color:#fff;}
+.card2{background:var(--t2);color:var(--blue);}
+.card3{background:var(--t3);color:#fff;}
+.sz-panel{background:#fff;border-radius:var(--r);padding:13px;margin-bottom:11px;box-shadow:var(--sh);}
+.sz-panel h3{font-family:'Fraunces',serif;font-size:14px;color:var(--purple);margin-bottom:10px;}
+.sz-q{margin-bottom:12px;}
+.sz-qt{font-size:12px;font-weight:700;color:#444;margin-bottom:5px;}
+.sz-ref{font-size:11px;color:#888;margin-bottom:6px;}
+.sz-inputs{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;}
+.sz-iw{text-align:center;}
+.sz-lbl{font-size:9px;font-weight:700;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.szl1{color:var(--blue);}.szl2{color:#886600;}.szl3{color:var(--red);}
+.sz-inp{width:100%;padding:7px 3px;text-align:center;font-size:14px;font-weight:700;border:2px solid #ddd;border-radius:8px;font-family:'DM Sans',sans-serif;}
+.sz-inp:focus{outline:none;border-color:var(--purple);}
+.sz-btn{width:100%;padding:9px;background:var(--purple);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;margin-top:8px;}
+
+/* SETUP */
+.setw{padding:12px 12px 40px;}
+.setcard{background:#fff;border-radius:var(--r);padding:14px;margin-bottom:11px;box-shadow:var(--sh);}
+.setcard h3{font-family:'Fraunces',serif;font-size:15px;color:var(--blue);margin-bottom:11px;}
+.save-btn{width:100%;padding:13px;background:var(--blue);color:#fff;border:none;border-radius:var(--r);font-family:'Fraunces',serif;font-size:17px;font-weight:700;cursor:pointer;transition:.15s;margin-top:4px;}
+.save-btn:active{transform:scale(.97);}
+.reset-btn{width:100%;padding:11px;background:#fff;color:#cc0000;border:2px solid #cc0000;border-radius:var(--r);font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;margin-top:8px;}
+.tl-row{display:flex;gap:8px;margin-bottom:7px;font-size:13px;align-items:flex-start;}
+.tl-tag{background:var(--blue);color:#fff;font-size:11px;font-weight:700;padding:2px 7px;border-radius:5px;white-space:nowrap;flex-shrink:0;}
+
+/* TOAST */
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--dark);color:#fff;padding:9px 18px;border-radius:20px;font-size:13px;font-weight:500;z-index:9999;white-space:nowrap;transition:transform .28s cubic-bezier(.34,1.56,.64,1);pointer-events:none;}
+.toast.on{transform:translateX(-50%) translateY(0);}
+.tag{display:inline-block;background:var(--yellow);color:var(--blue);font-size:10px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:3px;}
+
+/* Map custom markers */
+.mmarker{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;border:2px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3);}
+.m-done{background:var(--green);}
+.m-cur{background:var(--blue);}
+.m-todo{background:#aaa;}
+</style>
+</head>
+<body>
+
+<!-- ═══ INTRO ═══ -->
+<div class="screen on" id="sIntro">
+  <div class="intro-hero">
+    <div class="i-logo">IKEA</div>
+    <div class="i-hero-title">Billy & Barock<br>Recruitment Quest</div>
+    <div class="i-hero-sub">🏙️ Salzburg · 10 Stationen · 24 Fragen · 3 Teams</div>
+    <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px;letter-spacing:.3px;">Version 4 – aktuellste Version</div>
+  </div>
+  <div class="i-body">
+    <div class="icard">
+      <h3>🏷️ Schritt 1 – Teamnamen</h3>
+      <div class="name-row"><div class="dot" style="background:var(--t1)"></div><input class="ninp" id="it1" value="Team BILLY" placeholder="Team 1"></div>
+      <div class="name-row"><div class="dot" style="background:var(--t2);border:1px solid #ddd"></div><input class="ninp" id="it2" value="Team PAX" placeholder="Team 2"></div>
+      <div class="name-row"><div class="dot" style="background:var(--t3)"></div><input class="ninp" id="it3" value="Team KALLAX" placeholder="Team 3"></div>
+    </div>
+    <div class="icard">
+      <h3>⭐ Punktesystem</h3>
+      <div class="pgrid">
+        <div class="pp pp-b">📚 Wissensfragen<strong>3–5 Punkte</strong></div>
+        <div class="pp pp-y">🎯 Schätzfragen<strong>5 / 3 / 1</strong></div>
+        <div class="pp pp-g">📸 Kreativaufgaben<strong>3 + bis zu +2</strong></div>
+        <div class="pp pp-r">➕ Zusatzfragen<strong>+1 Punkt</strong></div>
+      </div>
+    </div>
+    <div class="icard">
+      <h3>📋 Spielregeln</h3>
+      <ul class="rules">
+        <li>Moderator führt Gruppe von Station zu Station.</li>
+        <li>Teams antworten via Handy-Buzzer <strong>oder</strong> mündlich.</li>
+        <li>Schätzfragen: Schätzungen notieren, Auswertung im Finale.</li>
+        <li>BILLY-Bonus: bis zu +2 für besonders kreative Fotos/Antworten.</li>
+        <li>Spaß vor Präzision! 🎉</li>
+      </ul>
+    </div>
+    <button class="go-btn" onclick="startApp()">🚀 Rallye starten!</button>
+    <div style="margin-top:12px;text-align:center;">
+      <button style="background:none;border:none;color:#888;font-size:13px;cursor:pointer;text-decoration:underline;" onclick="goTeamScreen()">Teams: hier öffnen für Team-Buzzer →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TEAM BUZZER SELECTION ═══ -->
+<div class="screen" id="sTeam">
+  <div class="team-buzzer-wrap">
+    <div class="tb-logo">IKEA</div>
+    <div class="tb-title">Billy & Barock</div>
+    <div class="tb-sub">Wähle dein Team um mitzuspielen</div>
+    <div class="team-select-grid">
+      <button class="team-sel-btn tsb-1" onclick="selectTeam(0)" id="tbtn0">🔵 Team BILLY</button>
+      <button class="team-sel-btn tsb-2" onclick="selectTeam(1)" id="tbtn1">🟡 Team PAX</button>
+      <button class="team-sel-btn tsb-3" onclick="selectTeam(2)" id="tbtn2">🔴 Team KALLAX</button>
+    </div>
+    <button class="tb-mod-btn" onclick="goModeratorMode()">👑 Ich bin der Moderator</button>
+  </div>
+</div>
+
+<!-- ═══ TEAM ANSWER ═══ -->
+<div class="screen" id="sTeamAnswer">
+  <div class="ta-header">
+    <button class="ta-back" onclick="goTeamScreen()">←</button>
+    <div class="ta-title" id="taTitle">Team BILLY</div>
+  </div>
+  <div class="ta-body" id="taBody"></div>
+</div>
+
+<!-- ═══ MAIN APP (Moderator) ═══ -->
+<div class="screen" id="sApp">
+  <div class="topbar">
+    <div class="topbar-row">
+      <div class="tb-logo-s">IKEA</div>
+      <div class="tb-appname">Billy & Barock · Moderator</div>
+      <div class="tb-pill" id="tbPill">St 1</div>
+    </div>
+    <div style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;padding-bottom:4px;letter-spacing:.3px;">v4 – aktuellste Version</div>
+    <div class="score-strip" id="scoreStrip"></div>
+  </div>
+  <div class="content" id="mainContent"></div>
+  <div class="bottomnav">
+    <button class="bn on" id="bn-guide" onclick="showTab('guide')"><span class="bi">🗺️</span>Moderieren</button>
+    <button class="bn" id="bn-map" onclick="showTab('map')"><span class="bi">📍</span>Karte</button>
+    <button class="bn" id="bn-sb" onclick="showTab('sb')"><span class="bi">🏆</span>Scoreboard</button>
+    <button class="bn" id="bn-setup" onclick="showTab('setup')"><span class="bi">⚙️</span>Setup</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const STATIONS=[
+  {id:1,name:"Station FESTSPIEL",loc:"Hofstallgasse / Festspielhäuser",icon:"🎭",time:"15–20 Min",
+   lat:47.7984,lng:13.0435,
+   ctx:"Ihr steht vor dem Großen Festspielhaus – einem der größten Bühnenhäuser der Welt. Hier fanden 1920 erstmals die Salzburger Festspiele statt.",
+   facts:["Das Große Festspielhaus wurde 1960 eröffnet – exakt 2.179 Sitzplätze.","Die Festspiele gelten als DIE Festspielinstitution für klassische Musik in Europa.","💡 Icebreaker-Frage nutzen: keine Punkte, einfach zum Lachen & Kennenlernen!"]},
+  {id:2,name:"Station MOZART",loc:"Getreidegasse / Mozarts Geburtshaus",icon:"🎵",time:"15–20 Min",
+   lat:47.8002,lng:13.0432,
+   ctx:"Die Getreidegasse ist eine der ältesten Einkaufsstraßen Salzburgs, berühmt für ihre historischen Zunftschilder. Nr. 9: Mozarts Geburtshaus.",
+   facts:["Mozarts voller Name: Johannes Chrysostomus Wolfgangus Theophilus Mozart.","Von 7 Kindern überlebte nur Schwester Nannerl neben Wolfgang das Kindesalter.","Die Zunftschilder zeigen das jeweilige Handwerk – Schlüssel = Schlosser, Krone = Goldschmied?"]},
+  {id:3,name:"Station SALZ",loc:"Auf dem Weg Richtung Residenzplatz",icon:"🧂",time:"5–10 Min",
+   lat:47.7997,lng:13.0446,
+   ctx:"Salz war das 'Weiße Gold' Salzburgs – der Name der Stadt kommt davon. Der Reichtum der Fürsterzbischöfe floss über Jahrhunderte buchstäblich hier entlang.",
+   facts:["Speisesalz = NaCl = Natrium + Chlor.","Ein Golddukaten (3,5 g Gold) = heute mehrere hundert Euro.","⏱ Kurzstation – max. 10 Minuten, dann weiter!"]},
+  {id:4,name:"Station RESIDENZ",loc:"Residenzplatz / Residenzbrunnen",icon:"⛲",time:"15–20 Min",
+   lat:47.7993,lng:13.0457,
+   ctx:"Der Residenzplatz ist das historische Herz Salzburgs. Der Barockbrunnen wurde 1656–1661 erbaut und ist einer der größten barocken Brunnen Mitteleuropas.",
+   facts:["Im Brunnen versteckt: Meerrösser, Triton, Delfine – und kleine Frösche, Eidechsen & Schildkröten!","Material: Untersberger Marmor. Steht unter Denkmalschutz.","Jedermann wird jedes Jahr genau am Domplatz aufgeführt – perfekt für die Schauspiel-Aufgabe!"]},
+  {id:5,name:"Station SPHAERA",loc:"Kapitelplatz / Schach & goldene Kugel",icon:"🎱",time:"15 Min",
+   lat:47.7979,lng:13.0464,
+   ctx:"Die goldene Kugel 'Sphaera' ist ein modernes Kunstwerk von Stephan Balkenhol (2007). Daneben: ein riesiges Außenschachbrett – direkter Schauplatz für die Schachfrage.",
+   facts:["Referenzwert Schätzfrage: 3.400.000 Mozartkugeln.","Verschiedene Hersteller produzieren über 100 Mio. Mozartkugeln/Jahr – trotzdem nichts gegen IKEA Köttbullar!","⭐ Schätzungen aller Teams notieren, Auswertung erst im Finale!"]},
+  {id:6,name:"Station STIEGL",loc:"Stiegl-Keller / Aussichtsterrasse 🍺",icon:"🍺",time:"20 Min + Pause",
+   lat:47.7964,lng:13.0474,
+   ctx:"Der Stiegl-Keller thront über der Altstadt mit Blick auf die Festung. Die Stiegl-Brauerei (gegründet 1492!) ist eine der ältesten aktiven Brauereien Österreichs.",
+   facts:["Stiegl = 1492 gegründet – dasselbe Jahr entdeckte Kolumbus Amerika!","Österreich: ~100 Liter Bier pro Kopf/Jahr → Platz 2–3 weltweit, hinter Tschechien.","Lederschildkröte: bis 35 km/h im Wasser → 500 m ≈ 51 Sekunden!"]},
+  {id:7,name:"Station FESTUNG",loc:"Festungsumfeld / Aussichtspunkt",icon:"🏰",time:"10 Min",
+   lat:47.7952,lng:13.0472,
+   ctx:"Die Festung Hohensalzburg (gegründet 1077) ist eine der größten und best erhaltenen Burgen Europas. Von hier hat man den perfekten Blick auf ihre Lage über der Stadt.",
+   facts:["Die Festung liegt ca. 120 m über der Salzach – je nach Messpunkt ~100 m über der Altstadt.","Über 900 Jahre alt – und noch nie ernsthaft erobert worden!","⏱ Kurzstation, dann Aufstieg Richtung Mönchsberg."]},
+  {id:8,name:"Station MÖNCH",loc:"Mönchsberg / Museum der Moderne",icon:"🏛️",time:"20–25 Min",
+   lat:47.7982,lng:13.0411,
+   ctx:"Der Aussichtspunkt am Mönchsberg bietet einen der besten Panoramablicke über ganz Salzburg. Das Museum der Moderne eröffnete 2004 – dort, wo früher das Café Winkler stand.",
+   facts:["Café Winkler + Salzburger Casino standen früher genau hier.","Mönchsbergaufzug: in wenigen Sekunden auf ~485 m Seehöhe.","⭐ Schätzfrage Kirchen: Referenzwert ca. 50. Schätzungen jetzt notieren, Auswertung im Finale!"]},
+  {id:9,name:"Station BALTRAM",loc:"Baltram – Feine Patisserie 🍰",icon:"🍰",time:"10–15 Min",
+   lat:47.8031,lng:13.0387,
+   ctx:"Süße Pause bei der Baltram Patisserie – einer der besten Konditoreien Salzburgs. Perfekter Moment für eine Rechenaufgabe mit Selbstironie.",
+   facts:["Rechenweg: 1.200 kcal ÷ 25 kcal/km = 48,0 km.","250 kcal pro 10 km beim Radfahren = 25 kcal/km.","Großzügige Punktevergabe hier – Stimmung wichtiger als Präzision!"]},
+  {id:10,name:"Station FINALE",loc:"Augustiner Bräu Kloster Mülln 🍺",icon:"🏆",time:"30+ Min",
+   lat:47.8046,lng:13.0378,
+   ctx:"Das große Finale! Schätzfragen auswerten, Kreativfotos bewerten, Gesamtsieger küren. Prost auf ein großartiges Team-Event!",
+   facts:["IKEA: über 1 Milliarde Köttbullar/Jahr weltweit – in Österreich allein 54 Mio.!","Alle Mozartkugeln zusammen liegen deutlich darunter.","💡 Jetzt Schätzfragen im Scoreboard-Tab auswerten, dann Siegerehrung!"]},
+];
+
+const QUESTIONS=[
+  {id:1,st:1,n:1,type:"Icebreaker",
+   text:"Wie gut kennt ihr euch als Team schon?",
+   mcOpts:["A) Blind Date – wir kennen uns kaum","B) Kollegen, aber nicht privat","C) Wir kennen uns gut – auch privat","D) Wir sind fast eine Familie 😄"],
+   correct:null,answer:"Keine richtige Antwort – Stimmungsfrage!",
+   pts:[0],billyBonus:false,
+   hint:"Keine Punkte! Alle kurz antworten lassen – bringt die Gruppe zum Lachen. Perfekter Einstieg."},
+  {id:2,st:1,n:2,type:"Offen",
+   text:"In welchem Jahr fanden die Salzburger Festspiele in der heutigen Form erstmals statt?",
+   mcOpts:null,correct:null,answer:"1920",
+   pts:[0,2,4],billyBonus:false,
+   hint:"4 Pkt bei exakt 1920 · 2 Pkt bei 1919 oder 1921 · 0 Pkt sonst."},
+  {id:3,st:1,n:3,type:"Multiple Choice",
+   text:"Wie viele Sitzplätze hat das Große Festspielhaus?",
+   mcOpts:["A) 2.047 Sitzplätze","B) 2.179 Sitzplätze","C) 2.236 Sitzplätze","D) 1.958 Sitzplätze"],
+   correct:1,answer:"B) 2.179 Sitzplätze",
+   pts:[0,4],billyBonus:false,
+   hint:"Nur B als korrekt."},
+  {id:4,st:1,n:4,type:"Offen",
+   text:"Nennt eine berühmte Person, die mit den Salzburger Festspielen verbunden ist.",
+   mcOpts:null,correct:null,answer:"z.B. Herbert von Karajan, Max Reinhardt, Anna Netrebko …",
+   pts:[0,2],billyBonus:false,
+   hint:"2 Pkt bei jeder plausiblen Verbindung. Großzügig werten!"},
+  {id:5,st:2,n:5,type:"Foto/Kreativ",
+   text:"Findet ein Zunftschild mit Schlüssel oder Krone. Macht ein Foto, stellt das Symbol nach und beschreibt kurz welches es ist.",
+   mcOpts:null,correct:null,answer:"Symbol korrekt erkannt & nachgestellt",
+   pts:[0,3,4,5],billyBonus:true,
+   hint:"3 Pkt wenn erkennbar + Beschreibung. +1/+2 BILLY-Bonus für besonders kreative Umsetzung."},
+  {id:6,st:2,n:6,type:"Offen",
+   text:"In welchem Jahr wurde Wolfgang Amadeus Mozart geboren?",
+   mcOpts:null,correct:null,answer:"1756",
+   pts:[0,4],billyBonus:false,
+   hint:"Nur 1756 als korrekt."},
+  {id:7,st:2,n:7,type:"Offen",
+   text:"Wie viele Geschwister hatte Mozart insgesamt (inkl. früh Verstorbener)?",
+   mcOpts:null,correct:null,answer:"6",
+   pts:[0,2,4],billyBonus:false,
+   hint:"4 Pkt bei 6 · 2 Pkt bei 5 oder 7 · 0 Pkt sonst."},
+  {id:8,st:3,n:8,type:"Multiple Choice",
+   text:"Aus welchen beiden chemischen Elementen besteht gewöhnliches Speisesalz?",
+   mcOpts:["A) Kohlenstoff und Sauerstoff","B) Wasserstoff und Sauerstoff","C) Natrium und Chlor","D) Kalium und Magnesium"],
+   correct:2,answer:"C) Natrium und Chlor (NaCl)",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur C als korrekt."},
+  {id:9,st:4,n:9,type:"Multiple Choice",
+   text:"In welchem Baustil ist der Residenzbrunnen gestaltet?",
+   mcOpts:["A) Gotik","B) Renaissance","C) Barock","D) Klassizismus"],
+   correct:2,answer:"C) Barock",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur C. Erbaut 1656–1661."},
+  {id:10,st:4,n:10,type:"Multiple Choice (Zusatz +1)",
+   text:"Aus welchem Material besteht der Residenzbrunnen hauptsächlich?",
+   mcOpts:["A) Granit","B) Untersberger Marmor","C) Sandstein","D) Bronze"],
+   correct:1,answer:"B) Untersberger Marmor",
+   pts:[0,1],billyBonus:false,
+   hint:"+1 Zusatzpunkt. Nur B korrekt."},
+  {id:11,st:4,n:11,type:"Foto/Kreativ",
+   text:"Stellt eine Szene aus 'Jedermann' nach – reicher Jedermann & armer Bittsteller. Foto + ein Satz was passiert.",
+   mcOpts:null,correct:null,answer:"Foto zeigt klar zwei Rollen, Beschreibung passt",
+   pts:[0,3,4,5],billyBonus:true,
+   hint:"3 Pkt bei klar erkennbarer Szene. +1/+2 BILLY-Bonus für besonders gute Darstellung."},
+  {id:12,st:5,n:12,type:"Offen",
+   text:"Auf welchem Feld startet die schwarze Dame im Schach zu Beginn einer Partie?",
+   mcOpts:null,correct:null,answer:"d8",
+   pts:[0,5],billyBonus:false,
+   hint:"Nur 'd8' korrekt (Groß-/Kleinschreibung egal)."},
+  {id:13,st:5,n:13,type:"Schätzfrage ⭐",
+   text:"Wenn die goldene Kugel 'Sphaera' innen hohl wäre – wie viele Mozartkugeln (Ø 4 cm) passen ungefähr hinein?",
+   mcOpts:null,correct:null,answer:"Referenzwert: 3.400.000 · Auswertung im Finale",
+   pts:[0,1,3,5],billyBonus:false,
+   hint:"Alle Schätzungen notieren! Auswertung am Finale. Referenz: 3.400.000 Stück."},
+  {id:14,st:6,n:14,type:"Multiple Choice",
+   text:"Wie lange würde die schnellste Schildkrötenart (Lederschildkröte, bis 35 km/h im Wasser) von hier bis zum Stiegl-Keller brauchen? (ca. 500 m)",
+   mcOpts:["A) ca. 10 Sekunden","B) ca. 1 Minute","C) ca. 10 Minuten","D) ca. 1 Stunde"],
+   correct:1,answer:"B) ca. 1 Minute (≈51 Sek.)",
+   pts:[0,4],billyBonus:false,
+   hint:"Nur B. Rechnung: 35 km/h = 9,72 m/s → 500 ÷ 9,72 ≈ 51 Sek."},
+  {id:15,st:6,n:15,type:"Offen (Bonus +1)",
+   text:"Bonusfrage: Wie heißt diese Schildkrötenart?",
+   mcOpts:null,correct:null,answer:"Lederschildkröte (Dermochelys coriacea)",
+   pts:[0,1],billyBonus:false,
+   hint:"+1 Punkt bei 'Lederschildkröte'."},
+  {id:16,st:6,n:16,type:"Multiple Choice",
+   text:"Wie viel Bier trinkt eine Person in Österreich im Durchschnitt pro Jahr?",
+   mcOpts:["A) ca. 30 Liter","B) ca. 60 Liter","C) ca. 100 Liter","D) ca. 150 Liter"],
+   correct:2,answer:"C) ca. 100 Liter",
+   pts:[0,4],billyBonus:false,
+   hint:"Nur C. Österreich Platz 2–3 weltweit, hinter Tschechien."},
+  {id:17,st:6,n:17,type:"Multiple Choice",
+   text:"In welchem Jahr wurde die Stiegl-Brauerei gegründet?",
+   mcOpts:["A) 1292","B) 1392","C) 1492","D) 1592"],
+   correct:2,answer:"C) 1492",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur C. Gleiche Jahr wie Kolumbus!"},
+  {id:18,st:7,n:18,type:"Multiple Choice",
+   text:"Um wie viele Meter liegt die Festung Hohensalzburg ungefähr über der Altstadt?",
+   mcOpts:["A) ca. 50 Meter","B) ca. 100 Meter","C) ca. 200 Meter","D) ca. 400 Meter"],
+   correct:1,answer:"B) ca. 100 Meter",
+   pts:[0,4],billyBonus:false,
+   hint:"Nur B. Eine der größten vollständig erhaltenen Burgen Europas."},
+  {id:19,st:8,n:19,type:"Multiple Choice",
+   text:"Was befand sich früher an der Stelle des heutigen Museums der Moderne am Mönchsberg?",
+   mcOpts:["A) Ein Steinbruch für den Festungsbau","B) Ein Militärhospital","C) Das Café Winkler mit dem Salzburger Casino","D) Ein Benediktinerkloster"],
+   correct:2,answer:"C) Das Café Winkler mit dem Salzburger Casino",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur C. Museum eröffnet 2004."},
+  {id:20,st:8,n:20,type:"Schätzfrage ⭐",
+   text:"Von hier aus: Wie viele Kirchen gibt es ungefähr im engeren Zentrum der Salzburger Altstadt (inkl. Stadtberge)?",
+   mcOpts:null,correct:null,answer:"Referenzwert: ca. 50 Kirchen · Auswertung im Finale",
+   pts:[0,1,3,5],billyBonus:false,
+   hint:"Alle Schätzungen notieren! Referenz: ca. 50 Kirchen. Auswertung im Finale."},
+  {id:21,st:8,n:21,type:"Multiple Choice",
+   text:"Wie viele Tourist:innen pro Einwohner:in kommen ungefähr pro Jahr nach Salzburg?",
+   mcOpts:["A) ca. 3 pro Einwohner:in","B) ca. 11 pro Einwohner:in","C) ca. 25 pro Einwohner:in","D) ca. 40 pro Einwohner:in"],
+   correct:1,answer:"B) ca. 11 Tourist:innen pro Einwohner:in",
+   pts:[0,5],billyBonus:false,
+   hint:"Nur B. ~1,7 Mio. Ankünfte ÷ ~160.000 Einwohner:innen."},
+  {id:22,st:9,n:22,type:"Offen (Rechnen)",
+   text:"Ihr habt 1.200 kcal an Süßem verdrückt. Radfahren = 250 kcal/10 km. Wie viele km müsstet ihr fahren? (1 Nachkommastelle)",
+   mcOpts:null,correct:null,answer:"48,0 km",
+   pts:[0,1,3,5],billyBonus:false,
+   hint:"5 Pkt bei 47,5–48,5 km · 3 Pkt bei 46–50 km · 1 Pkt bei erkennbarer Rechnung."},
+  {id:23,st:10,n:23,type:"Multiple Choice",
+   text:"Was wird pro Jahr in größerer Stückzahl verkauft – Mozartkugeln oder IKEA Köttbullar?",
+   mcOpts:["A) Mozartkugeln","B) IKEA Köttbullar"],
+   correct:1,answer:"B) IKEA Köttbullar (über 1 Milliarde/Jahr weltweit)",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur B. Über 1 Milliarde Köttbullar pro Jahr!"},
+  {id:24,st:10,n:24,type:"Multiple Choice",
+   text:"Wie viele IKEA Köttbullar werden pro Jahr in Österreich verkauft?",
+   mcOpts:["A) 5,4 Millionen","B) 18 Millionen","C) 54 Millionen","D) 120 Millionen"],
+   correct:2,answer:"C) 54 Millionen Köttbullar",
+   pts:[0,3],billyBonus:false,
+   hint:"Nur C. Perfekte Schluss-Pointe! 🎉"},
+];
+
+const SCHAETZ=[
+  {qId:13,label:"Q13 – Mozartkugeln in Sphaera",ref:"3.400.000 Stück",refVal:3400000},
+  {qId:20,label:"Q20 – Kirchen in der Altstadt",ref:"ca. 50 Kirchen",refVal:50},
+];
+
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+let S={
+  teamNames:["Team BILLY","Team PAX","Team KALLAX"],
+  curSt:1,curTab:'guide',
+  scores:{},hints:{},szInputs:{},
+  buzzer:{}, // {qId:[{tIdx,answer,time},...]}
+};
+function load(){try{const d=localStorage.getItem('bb4');if(d){const p=JSON.parse(d);S={...S,...p};}}catch(e){}}
+function save(){try{localStorage.setItem('bb4',JSON.stringify(S));}catch(e){}}
+function total(t){return QUESTIONS.reduce((s,q)=>s+((S.scores[q.id]||{})[t]||0),0);}
+function answered(){return QUESTIONS.filter(q=>[0,1,2].some(t=>(S.scores[q.id]||{})[t]!=null)).length;}
+
+// ═══════════════════════════════════════
+// SCREEN ROUTING
+// ═══════════════════════════════════════
+let curTeamIdx=null;
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+}
+function startApp(){
+  S.teamNames[0]=document.getElementById('it1').value||'Team BILLY';
+  S.teamNames[1]=document.getElementById('it2').value||'Team PAX';
+  S.teamNames[2]=document.getElementById('it3').value||'Team KALLAX';
+  save(); showScreen('sApp'); showTab('guide');
+}
+function goTeamScreen(){
+  // update team buttons with current names
+  [0,1,2].forEach(i=>{
+    const b=document.getElementById('tbtn'+i);
+    if(b) b.textContent=['🔵','🟡','🔴'][i]+' '+S.teamNames[i];
+  });
+  showScreen('sTeam');
+}
+function goModeratorMode(){showScreen('sApp');showTab('guide');}
+function selectTeam(idx){
+  curTeamIdx=idx;
+  document.getElementById('taTitle').textContent=S.teamNames[idx];
+  renderTeamAnswer();
+  showScreen('sTeamAnswer');
+}
+
+// ═══════════════════════════════════════
+// TEAM ANSWER SCREEN
+// ═══════════════════════════════════════
+function renderTeamAnswer(){
+  const st=STATIONS.find(s=>s.id===S.curSt);
+  const qs=QUESTIONS.filter(q=>q.st===S.curSt&&q.type!=='Icebreaker'&&!q.type.startsWith('Schätzfrage'));
+  const t=curTeamIdx;
+  const tColor=['var(--t1)','var(--t2)','var(--t3)'][t];
+  const cardCls=['ta-score-chip c1','ta-score-chip c2','ta-score-chip c3'][t];
+
+  let html=`
+    <div class="${cardCls}">
+      <div class="csn">${S.teamNames[t]} – PAX-Points</div>
+      <div class="csp">${total(t)}</div>
+    </div>
+    <div class="ta-station-info">
+      <div class="ta-st-name">${st.icon} ${st.name}</div>
+      <div class="ta-st-loc">📍 ${st.loc}</div>
+    </div>`;
+
+  if(qs.length===0){
+    html+=`<div class="ta-no-q"><div class="emoji">🎯</div><p>An dieser Station gibt es keine Buzzer-Fragen.<br>Schau auf das iPad des Moderators!</p></div>`;
+  } else {
+    qs.forEach(q=>{
+      const buzz=(S.buzzer[q.id]||[]).find(b=>b.tIdx===t);
+      const alreadyAnswered=buzz!=null;
+      const sc=(S.scores[q.id]||{})[t];
+      const isScored=sc!=null;
+      if(isScored){
+        html+=`<div class="ta-q-card" style="border-left-color:var(--green)">
+          <div class="ta-q-num">Q${q.n} · ${q.type}</div>
+          <div class="ta-q-text">${q.text}</div>
+          <div style="text-align:center;padding:10px;font-size:14px;color:var(--green);font-weight:700;">✅ Bewertet: ${sc} Punkte</div>
+        </div>`;
+      } else if(alreadyAnswered){
+        html+=`<div class="ta-q-card" style="border-left-color:var(--yellow)">
+          <div class="ta-q-num">Q${q.n} · ${q.type}</div>
+          <div class="ta-q-text">${q.text}</div>
+          <div class="ta-waiting">⏳ Antwort abgeschickt: „${buzz.answer}"<br>Warte auf Moderator-Bewertung…</div>
+        </div>`;
+      } else {
+        html+=`<div class="ta-q-card" id="taq-${q.id}">
+          <div class="ta-q-num">Q${q.n} · ${q.type}</div>
+          <div class="ta-q-text">${q.text}</div>`;
+        if(q.mcOpts){
+          html+=q.mcOpts.map((o,i)=>`<button class="ta-mc-btn" id="mc-${q.id}-${i}" onclick="selectMC(${q.id},${i},'${o.replace(/'/g,"\\'")}',${t})">${o}</button>`).join('');
+        } else {
+          html+=`<input class="ta-open-inp" id="open-${q.id}" placeholder="Eure Antwort eingeben…">
+          <button class="ta-submit-btn" onclick="submitOpen(${q.id},${t})">📤 Antwort abschicken</button>`;
+        }
+        html+=`</div>`;
+      }
+    });
+  }
+  document.getElementById('taBody').innerHTML=html;
+}
+
+function selectMC(qId,optIdx,optText,tIdx){
+  // mark selected
+  const q=QUESTIONS.find(q=>q.id===qId);
+  if(q.mcOpts) q.mcOpts.forEach((_,i)=>{
+    const b=document.getElementById('mc-'+qId+'-'+i);
+    if(b) b.classList.toggle('selected',i===optIdx);
+  });
+  submitAnswer(qId,tIdx,optText);
+}
+function submitOpen(qId,tIdx){
+  const el=document.getElementById('open-'+qId);
+  if(!el||!el.value.trim()){toast('Bitte Antwort eingeben!');return;}
+  submitAnswer(qId,tIdx,el.value.trim());
+}
+function submitAnswer(qId,tIdx,answer){
+  if(!S.buzzer[qId]) S.buzzer[qId]=[];
+  // remove old entry for this team if exists
+  S.buzzer[qId]=S.buzzer[qId].filter(b=>b.tIdx!==tIdx);
+  S.buzzer[qId].push({tIdx,answer,time:Date.now()});
+  save();
+  setTimeout(()=>{renderTeamAnswer();},300);
+  toast('✅ Antwort abgeschickt!');
+  // If moderator is on guide, refresh buzzer panel
+  if(S.curTab==='guide') refreshBuzzerPanel(qId);
+}
+
+function refreshBuzzerPanel(qId){
+  const panel=document.getElementById('bz-'+qId);
+  if(panel) panel.innerHTML=buzzerPanelInner(qId);
+}
+function buzzerPanelInner(qId){
+  const entries=(S.buzzer[qId]||[]).sort((a,b)=>a.time-b.time);
+  if(entries.length===0) return '<div style="font-size:12px;color:#aaa;padding:4px 0;">Noch keine Team-Antworten eingegangen…</div>';
+  return entries.map((e,rank)=>{
+    const tColor=['#0051BA','#886600','#E02020'][e.tIdx];
+    return `<div class="buzzer-entry">
+      <div class="be-team" style="color:${tColor}">${rank===0?'⚡ ':rank===1?'2️⃣ ':'3️⃣ '}${S.teamNames[e.tIdx]}</div>
+      <div class="be-answer">„${e.answer}"</div>
+    </div>`;
+  }).join('')+
+  `<button class="clear-buzzer-btn" onclick="clearBuzzer(${qId})">🗑 Antworten löschen</button>`;
+}
+function clearBuzzer(qId){
+  S.buzzer[qId]=[]; save();
+  refreshBuzzerPanel(qId);
+}
+
+// ═══════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════
+function showTab(tab){
+  S.curTab=tab;
+  ['guide','map','sb','setup'].forEach(t=>{
+    document.getElementById('bn-'+t).classList.toggle('on',t===tab);
+  });
+  if(tab==='guide') renderGuide();
+  else if(tab==='map') renderMap();
+  else if(tab==='sb') renderSB();
+  else if(tab==='setup') renderSetup();
+}
+
+// ═══════════════════════════════════════
+// SCORE STRIP
+// ═══════════════════════════════════════
+function renderStrip(){
+  const ranked=[0,1,2].map(i=>({i,pts:total(i),name:S.teamNames[i]})).sort((a,b)=>b.pts-a.pts);
+  document.getElementById('scoreStrip').innerHTML=ranked.map(r=>`
+    <div class="ss c${r.i+1}">
+      <div class="ss-n">${r.name}</div>
+      <div class="ss-p">${r.pts}</div>
+    </div>`).join('');
+  const st=STATIONS.find(s=>s.id===S.curSt);
+  const stIdx=STATIONS.findIndex(s=>s.id===S.curSt)+1;
+  document.getElementById('tbPill').textContent=`St ${stIdx}/10`;
+}
+
+// ═══════════════════════════════════════
+// GUIDE
+// ═══════════════════════════════════════
+function renderGuide(){
+  renderStrip();
+  const st=STATIONS.find(s=>s.id===S.curSt);
+  const qs=QUESTIONS.filter(q=>q.st===S.curSt);
+  const stIdx=STATIONS.findIndex(s=>s.id===S.curSt);
+  const stDone=qs.every(q=>[0,1,2].some(t=>(S.scores[q.id]||{})[t]!=null)||q.type==='Icebreaker'||q.type.startsWith('Schätzfrage'));
+
+  let html='<div class="gw">';
+
+  // Station hero
+  html+=`<div class="st-hero">
+    <div class="st-n">Station ${S.curSt} von ${STATIONS.length}</div>
+    <div class="st-name">${st.icon} ${st.name}</div>
+    <div class="st-loc">📍 ${st.loc}</div>
+    <div class="st-meta">
+      <span class="st-badge">⏱ ${st.time}</span>
+      <span class="st-badge">❓ ${qs.length} Fragen</span>
+      ${stDone?'<span class="st-badge" style="background:rgba(0,133,74,.4)">✅ Abgeschlossen</span>':''}
+    </div>
+  </div>`;
+
+  // Context
+  html+=`<div class="step-card">
+    <div class="slabel"><span>📖 Kontext & Fun Facts</span><div class="slabel-bar"><div class="slabel-fill" style="width:100%"></div></div></div>
+    <div class="ctx">${st.ctx}</div>
+    ${st.facts.map(f=>`<div class="ff">💡 ${f}</div>`).join('')}
+  </div>`;
+
+  // Questions
+  qs.forEach((q,qi)=>{
+    const sc=S.scores[q.id]||{};
+    const done=[0,1,2].some(t=>sc[t]!=null);
+    const showH=S.hints[q.id];
+    const isIce=q.type==='Icebreaker';
+    const isSz=q.type.startsWith('Schätzfrage');
+    const hasBuzzer=q.mcOpts||(!isIce&&!isSz);
+    const mcHtml=q.mcOpts?`<div class="mc-box">${q.mcOpts.map((o,i)=>`<div class="${i===q.correct?'cor':''}">${o}${i===q.correct?' ✓':''}</div>`).join('')}</div>`:'';
+    const szNote=isSz?`<div class="schaetz-notice">⭐ <strong>Schätzfrage!</strong> Jetzt alle Team-Schätzungen notieren. Punkte erst im Finale vergeben (Scoreboard-Tab).</div>`:'';
+    const bonusTag=q.billyBonus?`<span class="tag">BILLY-Bonus</span>`:'';
+    const scoreHtml=isSz||isIce?'':`<div class="sgrid">${[0,1,2].map(t=>teamBlock(q,t,sc[t])).join('')}</div>`;
+    const buzzerHtml=hasBuzzer&&!isIce&&!isSz?`
+      <div class="buzzer-panel" style="margin-bottom:8px;">
+        <h4>📱 Team-Antworten (Buzzer)</h4>
+        <div id="bz-${q.id}">${buzzerPanelInner(q.id)}</div>
+      </div>`:'';
+
+    html+=`<div class="step-card">
+      <div class="slabel">
+        <span>${isIce?'🧊 Icebreaker':`❓ Frage ${qi+1} von ${qs.length}`}</span>
+        <div class="slabel-bar"><div class="slabel-fill" style="width:${(qi+1)/qs.length*100}%"></div></div>
+      </div>
+      <div class="q-card ${done?'done':''} ${isIce?'ice':''} ${isSz?'schaetz':''}" id="qc-${q.id}">
+        <div class="qhead">
+          <span class="qnum">${isIce?'🧊':'Q'+q.n}</span>
+          <span class="qtype">${q.type} · max ${Math.max(...q.pts)} Pkt${q.billyBonus?' ⭐':''}</span>
+        </div>
+        <div class="qtext">${q.text}</div>
+        ${mcHtml}${szNote}
+        <div class="ans-box">✅ <strong>Antwort:</strong> ${q.answer} ${bonusTag}</div>
+        <button class="hint-btn" onclick="toggleHint(${q.id})">${showH?'▲ Hinweis verbergen':'▼ Moderator-Hinweis'}</button>
+        ${showH?`<div class="hint-box">💡 ${q.hint}</div>`:''}
+        ${buzzerHtml}
+        ${scoreHtml}
+      </div>
+    </div>`;
+  });
+
+  // Station navigation
+  html+=`<div class="stnav">
+    <button class="nav-btn-arrow nb-prev ${S.curSt<=1?'nb-disabled':''}" onclick="goSt(${S.curSt-1})" ${S.curSt<=1?'disabled':''}>← Zurück</button>
+    <button class="nav-btn-arrow nb-next" onclick="goSt(${S.curSt+1})" ${S.curSt>=STATIONS.length?'disabled':''}>
+      ${S.curSt>=STATIONS.length?'🏁 Finale!':'Nächste Station →'}
+    </button>
+  </div></div>`;
+
+  document.getElementById('mainContent').innerHTML=html;
+  document.getElementById('mainContent').scrollTop=0;
+}
+
+function goSt(n){
+  if(n<1||n>STATIONS.length) return;
+  S.curSt=n; save(); renderGuide();
+}
+
+function teamBlock(q,t,cur){
+  const cls=['b1','b2','b3'][t];
+  const short=S.teamNames[t].replace('Team ','');
+  const btns=q.pts.map(p=>{
+    let bc='pb'+Math.min(p,5); if(p===1||p===2) bc='pb'+p;
+    return `<button class="pb ${bc} ${cur===p?'sel':''}" onclick="setScore(${q.id},${t},${p})">${p===0?'✗':'+'+p}</button>`;
+  }).join('');
+  return `<div class="tsb2 ${cls}"><div class="tsb2-n">${short}</div><div class="pbcol">${btns}</div></div>`;
+}
+
+function toggleHint(id){
+  S.hints[id]=!S.hints[id];
+  const q=QUESTIONS.find(q=>q.id===id);
+  const sc=S.scores[id]||{};
+  const isIce=q.type==='Icebreaker';const isSz=q.type.startsWith('Schätzfrage');
+  const showH=S.hints[id];
+  const mcHtml=q.mcOpts?`<div class="mc-box">${q.mcOpts.map((o,i)=>`<div class="${i===q.correct?'cor':''}">${o}${i===q.correct?' ✓':''}</div>`).join('')}</div>`:'';
+  const szNote=isSz?`<div class="schaetz-notice">⭐ <strong>Schätzfrage!</strong> Alle Team-Schätzungen notieren. Auswertung im Finale.</div>`:'';
+  const bonusTag=q.billyBonus?`<span class="tag">BILLY-Bonus</span>`:'';
+  const hasBuzzer=q.mcOpts||(!isIce&&!isSz);
+  const buzzerHtml=hasBuzzer&&!isIce&&!isSz?`<div class="buzzer-panel" style="margin-bottom:8px;"><h4>📱 Team-Antworten (Buzzer)</h4><div id="bz-${id}">${buzzerPanelInner(id)}</div></div>`:'';
+  const scoreHtml=isSz||isIce?'':`<div class="sgrid">${[0,1,2].map(t=>teamBlock(q,t,sc[t])).join('')}</div>`;
+  const el=document.getElementById('qc-'+id);
+  if(el) el.innerHTML=`
+    <div class="qhead"><span class="qnum">${isIce?'🧊':'Q'+q.n}</span><span class="qtype">${q.type} · max ${Math.max(...q.pts)} Pkt</span></div>
+    <div class="qtext">${q.text}</div>${mcHtml}${szNote}
+    <div class="ans-box">✅ <strong>Antwort:</strong> ${q.answer} ${bonusTag}</div>
+    <button class="hint-btn" onclick="toggleHint(${id})">${showH?'▲ Hinweis verbergen':'▼ Moderator-Hinweis'}</button>
+    ${showH?`<div class="hint-box">💡 ${q.hint}</div>`:''}
+    ${buzzerHtml}${scoreHtml}`;
+}
+
+function setScore(qId,tIdx,pts){
+  if(!S.scores[qId]) S.scores[qId]={};
+  S.scores[qId][tIdx]=pts; save(); renderStrip();
+  const q=QUESTIONS.find(q=>q.id===qId);
+  const sc=S.scores[qId];
+  const el=document.getElementById('qc-'+qId);
+  if(el){
+    const row=el.querySelector('.sgrid');
+    if(row) row.innerHTML=[0,1,2].map(t=>teamBlock(q,t,sc[t])).join('');
+    el.classList.toggle('done',[0,1,2].some(t=>sc[t]!=null));
+  }
+  // also update team answer screen if visible
+  if(curTeamIdx!==null&&document.getElementById('sTeamAnswer').classList.contains('on')) renderTeamAnswer();
+  toast(`+${pts} Pkt → ${S.teamNames[tIdx]}`);
+}
+
+// ═══════════════════════════════════════
+// MAP
+// ═══════════════════════════════════════
+let mapInst=null;
+function renderMap(){
+  renderStrip();
+  document.getElementById('mainContent').innerHTML=`
+    <div class="map-wrap">
+      <div id="mapEl" style="height:360px;width:100%;border-radius:14px;overflow:hidden;"></div>
+      <div class="map-legend">
+        <h3>📍 Stationen-Übersicht</h3>
+        ${STATIONS.map(st=>{
+          const qs=QUESTIONS.filter(q=>q.st===st.id);
+          const done=qs.length>0&&qs.every(q=>[0,1,2].some(t=>(S.scores[q.id]||{})[t]!=null)||q.type==='Icebreaker'||q.type.startsWith('Schätzfrage'));
+          const cur=st.id===S.curSt;
+          const cls=done?'leg-done':cur?'leg-cur':'leg-todo';
+          const stPts=[0,1,2].map(t=>qs.reduce((s,q)=>s+((S.scores[q.id]||{})[t]||0),0));
+          return `<div class="legend-row" onclick="goStFromMap(${st.id})">
+            <div class="leg-num ${cls}">${st.id}</div>
+            <div class="leg-info">
+              <div class="leg-name">${st.icon} ${st.name}</div>
+              <div class="leg-loc">${st.loc}</div>
+            </div>
+            <div class="leg-pts">${cur?'▶ Aktuell':done?'✅ Done':''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+
+  // Init map - use requestAnimationFrame to ensure DOM is painted first
+  setTimeout(()=>{
+    const mapEl=document.getElementById('mapEl');
+    if(!mapEl) return;
+    if(mapInst){try{mapInst.remove();}catch(e){} mapInst=null;}
+    mapInst=L.map('mapEl',{zoomControl:true,tap:false}).setView([47.7995,13.043],15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
+      attribution:'© OpenStreetMap',maxZoom:19
+    }).addTo(mapInst);
+    mapInst.invalidateSize();
+
+    // Add markers
+    const latlngs=[];
+    STATIONS.forEach(st=>{
+      const qs=QUESTIONS.filter(q=>q.st===st.id);
+      const done=qs.length>0&&qs.every(q=>[0,1,2].some(t=>(S.scores[q.id]||{})[t]!=null)||q.type==='Icebreaker'||q.type.startsWith('Schätzfrage'));
+      const cur=st.id===S.curSt;
+      const color=done?'#00854A':cur?'#0051BA':'#aaa';
+      const icon=L.divIcon({
+        className:'',
+        html:`<div class="mmarker" style="background:${color}">${st.id}</div>`,
+        iconSize:[28,28],iconAnchor:[14,14]
+      });
+      L.marker([st.lat,st.lng],{icon})
+        .addTo(mapInst)
+        .bindPopup(`<b>${st.icon} ${st.name}</b><br>${st.loc}<br><small>${st.time}</small>`);
+      latlngs.push([st.lat,st.lng]);
+    });
+
+    // Draw route line
+    L.polyline(latlngs,{color:'#0051BA',weight:3,opacity:.5,dashArray:'6,8'}).addTo(mapInst);
+
+    // Try GPS
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(pos=>{
+        const gpsIcon=L.divIcon({
+          className:'',
+          html:`<div style="width:14px;height:14px;background:#E02020;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.4)"></div>`,
+          iconSize:[14,14],iconAnchor:[7,7]
+        });
+        L.marker([pos.coords.latitude,pos.coords.longitude],{icon:gpsIcon})
+          .addTo(mapInst).bindPopup('📍 Du bist hier');
+      },()=>{});
+    }
+
+    // Center on current station
+    const curSt=STATIONS.find(s=>s.id===S.curSt);
+    if(curSt) mapInst.setView([curSt.lat,curSt.lng],16);
+  },100);
+}
+
+function goStFromMap(stId){
+  S.curSt=stId; save();
+  showTab('guide');
+}
+
+// ═══════════════════════════════════════
+// SCOREBOARD
+// ═══════════════════════════════════════
+function renderSB(){
+  renderStrip();
+  const ranked=[0,1,2].map(i=>({i,pts:total(i),name:S.teamNames[i]})).sort((a,b)=>b.pts-a.pts);
+  const mx=Math.max(...ranked.map(r=>r.pts),1);
+  const medals=['🥇','🥈','🥉'];
+  const cards=['card1','card2','card3'];
+
+  let html='<div class="sbw">';
+  html+=`<div class="sb-h">KALLAX-Scoreboard</div><div class="sb-s">🏙️ Salzburg · Billy & Barock</div>`;
+  html+=ranked.map((r,ri)=>`
+    <div class="tc-card ${cards[r.i]}">
+      <div class="tc-r">${medals[ri]}</div>
+      <div class="tc-i">
+        <div class="tc-name">${r.name}</div>
+        <div class="tc-lbl">PAX-Points</div>
+        <div class="bw"><div class="bf" style="width:${r.pts/mx*100}%"></div></div>
+      </div>
+      <div class="tc-pts">${r.pts}</div>
+    </div>`).join('');
+
+  // Schätzfragen
+  html+=`<div class="sz-panel"><h3>⭐ Schätzfragen-Auswertung (Finale)</h3>
+    <p style="font-size:12px;color:#666;margin-bottom:12px;line-height:1.5;">Team-Schätzungen eintragen → „Punkte vergeben" → App berechnet automatisch 5/3/1.</p>`;
+  SCHAETZ.forEach(sz=>{
+    if(!S.szInputs[sz.qId]) S.szInputs[sz.qId]={};
+    html+=`<div class="sz-q">
+      <div class="sz-qt">${sz.label}</div>
+      <div class="sz-ref">📌 Referenzwert: <strong>${sz.ref}</strong></div>
+      <div class="sz-inputs">${[0,1,2].map(t=>`
+        <div class="sz-iw">
+          <div class="sz-lbl szl${t+1}">${S.teamNames[t].replace('Team ','')}</div>
+          <input class="sz-inp" type="number" id="sz-${sz.qId}-${t}" value="${S.szInputs[sz.qId][t]||''}" placeholder="?">
+        </div>`).join('')}
+      </div>
+      <button class="sz-btn" onclick="awardSz(${sz.qId},${sz.refVal})">🏆 Punkte vergeben</button>
+    </div>`;
+  });
+  html+='</div>';
+  html+=`<div style="text-align:center;font-size:11px;color:#bbb;margin-top:6px;">Tippe auf „Moderieren" um zurückzukehren</div>`;
+  html+='</div>';
+  document.getElementById('mainContent').innerHTML=html;
+}
+
+function awardSz(qId,refVal){
+  if(!S.szInputs[qId]) S.szInputs[qId]={};
+  const vals=[0,1,2].map(t=>{
+    const el=document.getElementById(`sz-${qId}-${t}`);
+    const v=parseFloat(el?el.value:'');
+    S.szInputs[qId][t]=isNaN(v)?null:v;
+    return {t,v:isNaN(v)?Infinity:v};
+  }).filter(v=>v.v!==Infinity);
+  save();
+  if(vals.length<2){toast('Bitte mind. 2 Schätzungen!');return;}
+  vals.sort((a,b)=>Math.abs(a.v-refVal)-Math.abs(b.v-refVal));
+  const pts=[5,3,1];
+  if(!S.scores[qId]) S.scores[qId]={};
+  vals.forEach((v,rank)=>{if(rank<3) S.scores[qId][v.t]=pts[rank];});
+  save(); renderSB(); renderStrip(); toast('✅ Schätzfrage ausgewertet!');
+}
+
+// ═══════════════════════════════════════
+// SETUP
+// ═══════════════════════════════════════
+function renderSetup(){
+  renderStrip();
+  document.getElementById('mainContent').innerHTML=`
+  <div class="setw">
+    <div class="setcard">
+      <h3>🏷️ Teamnamen ändern</h3>
+      <div class="name-row"><div class="dot" style="background:var(--t1)"></div><input class="ninp" id="s-t1" value="${S.teamNames[0]}"></div>
+      <div class="name-row"><div class="dot" style="background:var(--t2);border:1px solid #ddd"></div><input class="ninp" id="s-t2" value="${S.teamNames[1]}"></div>
+      <div class="name-row"><div class="dot" style="background:var(--t3)"></div><input class="ninp" id="s-t3" value="${S.teamNames[2]}"></div>
+      <button class="save-btn" onclick="saveSetup()">💾 Speichern</button>
+    </div>
+    <div class="setcard">
+      <h3>📱 Team-Buzzer Anleitung</h3>
+      <div style="font-size:13px;color:#444;line-height:1.7;">
+        1. Teams öffnen dieselbe HTML-Datei auf ihrem Handy.<br>
+        2. Auf „Teams: hier öffnen" tippen → Team auswählen.<br>
+        3. Sie sehen die aktuelle Frage und können antworten.<br>
+        4. Du siehst auf dem iPad wer zuerst geantwortet hat.<br>
+        5. Du vergibst die Punkte – Teams sehen ihre Bewertung sofort.
+      </div>
+    </div>
+    <div class="setcard">
+      <h3>⏰ Zeitplan</h3>
+      <div class="tl-row"><div class="tl-tag">11:00</div><div>🎭 Station 1 – Festspielhäuser (Start & Icebreaker)</div></div>
+      <div class="tl-row"><div class="tl-tag">11:30</div><div>🎵 Station 2 – Getreidegasse / Mozart</div></div>
+      <div class="tl-row"><div class="tl-tag">11:55</div><div>🧂 Station 3 – Salz & Gold (Kurzstation)</div></div>
+      <div class="tl-row"><div class="tl-tag">12:10</div><div>⛲ Station 4 – Residenzplatz / Brunnen</div></div>
+      <div class="tl-row"><div class="tl-tag">12:35</div><div>🎱 Station 5 – Kapitelplatz / Sphaera</div></div>
+      <div class="tl-row"><div class="tl-tag">12:55</div><div>🍺 Station 6 – Stiegl-Keller</div></div>
+      <div class="tl-row"><div class="tl-tag">13:00</div><div>🍽️ <strong>Mittagspause Stiegl-Keller</strong></div></div>
+      <div class="tl-row"><div class="tl-tag">13:50</div><div>🏰 Station 7 – Festungsumfeld</div></div>
+      <div class="tl-row"><div class="tl-tag">14:15</div><div>🏛️ Station 8 – Mönchsberg / Museum der Moderne</div></div>
+      <div class="tl-row"><div class="tl-tag">14:45</div><div>🍰 Station 9 – Baltram Patisserie</div></div>
+      <div class="tl-row"><div class="tl-tag">15:10</div><div>🏆 Station 10 – <strong>Finale im Augustiner</strong></div></div>
+      <div class="tl-row"><div class="tl-tag">15:30</div><div>🎉 Siegerehrung & Abschluss</div></div>
+    </div>
+    <div class="setcard">
+      <h3>🔄 Reset</h3>
+      <div style="font-size:12px;color:#888;margin-bottom:8px;">Alle Punkte & Buzzer-Antworten zurücksetzen. Teamnamen bleiben.</div>
+      <div id="resetConfirmBox" style="display:none;background:#fdeaea;border-radius:10px;padding:12px;margin-top:8px;text-align:center;">
+        <div style="font-size:13px;font-weight:600;color:#cc0000;margin-bottom:10px;">Wirklich alle Punkte löschen?</div>
+        <div style="display:flex;gap:8px;">
+          <button style="flex:1;padding:10px;background:#cc0000;color:#fff;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="resetAll()">Ja, löschen</button>
+          <button style="flex:1;padding:10px;background:#eee;color:#444;border:none;border-radius:8px;font-weight:700;cursor:pointer;" onclick="document.getElementById('resetConfirmBox').style.display='none'">Abbrechen</button>
+        </div>
+      </div>
+      <button class="reset-btn" onclick="document.getElementById('resetConfirmBox').style.display='block'">⚠️ Alles zurücksetzen</button>
+    </div>
+  </div>`;
+}
+function saveSetup(){
+  ['t1','t2','t3'].forEach((id,i)=>{
+    const el=document.getElementById('s-'+id);
+    if(el&&el.value) S.teamNames[i]=el.value;
+  });
+  save(); renderStrip(); toast('✅ Gespeichert!');
+}
+function resetAll(){
+  S.scores={};S.szInputs={};S.buzzer={};S.hints={};S.curSt=1;
+  save(); showTab('guide'); toast('♻️ Alles zurückgesetzt!');
+}
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('on');
+  clearTimeout(el._t); el._t=setTimeout(()=>el.classList.remove('on'),2000);
+}
+
+// ═══════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════
+load();
+document.getElementById('it1').value=S.teamNames[0];
+document.getElementById('it2').value=S.teamNames[1];
+document.getElementById('it3').value=S.teamNames[2];
+</script>
+</body>
+</html>
